@@ -1,269 +1,240 @@
-🧠 Handwritten Digit Recognition using PyTorch
+Here it is 👇 (just copy everything inside):
+
+# 🧠 Handwritten Digit Recognition using PyTorch
+
+![Python](https://img.shields.io/badge/Python-3.x-blue.svg)
+![PyTorch](https://img.shields.io/badge/PyTorch-Deep%20Learning-red.svg)
+![Status](https://img.shields.io/badge/Status-Completed-success.svg)
+![Dataset](https://img.shields.io/badge/Dataset-MNIST-orange.svg)
+![License](https://img.shields.io/badge/License-MIT-green.svg)
+
+---
+
+## 📌 Overview
+
+This project implements a Convolutional Neural Network (CNN) using PyTorch to classify handwritten digits (0–9) from the MNIST dataset.
+
+---
+
+## 📊 Dataset
+
+- Training Images: 60,000  
+- Testing Images: 10,000  
+- Image Size: 28×28  
+- Grayscale images  
+
+---
+
+## 🧠 Model Architecture
 
 
-
-
-
-
-
-
-
-
-📌 Overview
-
-This project builds a Convolutional Neural Network (CNN) using PyTorch to classify handwritten digits (0–9) from the MNIST dataset.
-
-It demonstrates:
-
-Deep learning fundamentals
-
-CNN architecture design
-
-Model training & evaluation
-
-Prediction and visualization
-
-📊 Dataset
-
-Dataset: MNIST
-
-Training Images: 60,000
-
-Testing Images: 10,000
-
-Image Size: 28×28 pixels
-
-Channels: Grayscale (1 channel)
-
-🧠 Model Architecture
 Input (1x28x28)
-   │
+│
 Conv2D (10 filters, kernel=5) → ReLU
-   │
+│
 MaxPool (2x2)
-   │
+│
 Conv2D (20 filters, kernel=5) → ReLU
-   │
+│
 MaxPool (2x2)
-   │
+│
 Flatten → 320
-   │
+│
 FC (50) → ReLU
-   │
+│
 FC (10)
-   │
-LogSoftmax
-⚙️ Installation
+│
+Softmax
+
+
+---
+
+## ⚙️ Installation
+
+
 git clone https://github.com/your-username/handwritten-digit-recognition.git
+
 cd handwritten-digit-recognition
 pip install torch torchvision matplotlib numpy
-🧩 Detailed Code Explanation
-1️⃣ Importing Libraries
+
+
+---
+
+## 🧩 Code Explanation
+
+### 1. Import Libraries
+
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 
-Explanation:
 
-torch → Core PyTorch library
+Used for building, training, and optimizing the neural network.
 
-nn → Used to build neural network layers
+---
 
-F → Functional API (activations, pooling, loss)
+### 2. Load Dataset
 
-optim → Optimizers like Adam, SGD
 
-2️⃣ Loading Dataset
 from torchvision import datasets
 from torchvision.transforms import ToTensor
 
 train_data = datasets.MNIST(root='data', train=True, transform=ToTensor(), download=True)
 test_data = datasets.MNIST(root='data', train=False, transform=ToTensor())
 
-Explanation:
 
-Downloads MNIST automatically
+Loads MNIST dataset and converts images into tensors.
 
-ToTensor() converts images → PyTorch tensors
+---
 
-Pixel values scaled to [0,1]
+### 3. DataLoader
 
-3️⃣ DataLoader (Batch Processing)
+
 from torch.utils.data import DataLoader
 
 loaders = {
-    'train': DataLoader(train_data, batch_size=100, shuffle=True),
-    'test': DataLoader(test_data, batch_size=100, shuffle=True)
+'train': DataLoader(train_data, batch_size=100, shuffle=True),
+'test': DataLoader(test_data, batch_size=100, shuffle=True)
 }
 
-Explanation:
 
-Splits data into batches (size = 100)
+Handles batching and shuffling of data.
 
-shuffle=True ensures randomness → better learning
+---
 
-Improves training efficiency
+### 4. CNN Model
 
-4️⃣ CNN Model Definition
+
 class CNN(nn.Module):
+def init(self):
+super(CNN, self).init()
 
-    def __init__(self):
-        super(CNN, self).__init__()
+    self.conv1 = nn.Conv2d(1, 10, kernel_size=5)
+    self.conv2 = nn.Conv2d(10, 20, kernel_size=5)
+    self.fc1 = nn.Linear(320, 50)
+    self.fc2 = nn.Linear(50, 10)
 
-        self.conv1 = nn.Conv2d(1, 10, kernel_size=5)
-        self.conv2 = nn.Conv2d(10, 20, kernel_size=5)
+Defines convolutional and fully connected layers.
 
-        self.fc1 = nn.Linear(320, 50)
-        self.fc2 = nn.Linear(50, 10)
+---
 
-Explanation:
+### 5. Forward Pass
 
-Conv2d(1,10) → extracts features from image
 
-Second conv layer → deeper features
-
-Fully connected layers → classification
-
-5️⃣ Forward Pass
 def forward(self, x):
-    x = F.relu(F.max_pool2d(self.conv1(x), 2))
-    x = F.relu(F.max_pool2d(self.conv2(x), 2))
-    x = x.view(-1, 320)
-    x = F.relu(self.fc1(x))
-    x = self.fc2(x)
-    return F.log_softmax(x, dim=1)
+x = F.relu(F.max_pool2d(self.conv1(x), 2))
+x = F.relu(F.max_pool2d(self.conv2(x), 2))
+x = x.view(-1, 320)
+x = F.relu(self.fc1(x))
+x = self.fc2(x)
+return F.log_softmax(x, dim=1)
 
-Step-by-step:
 
-Convolution → feature extraction
+Processes input through layers to generate predictions.
 
-ReLU → introduces non-linearity
+---
 
-MaxPooling → reduces dimensions
+### 6. Device Setup
 
-Flatten → converts to vector
 
-Fully connected → classification
-
-LogSoftmax → probability output
-
-6️⃣ Device Configuration
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model = CNN().to(device)
 
-Explanation:
 
-Uses GPU if available → faster training
+Uses GPU if available.
 
-Otherwise uses CPU
+---
 
-7️⃣ Optimizer
+### 7. Optimizer
+
+
 optimizer = optim.Adam(model.parameters())
 
-Explanation:
 
-Adam optimizer adjusts learning rate automatically
+Used to update model weights.
 
-Faster convergence compared to SGD
+---
 
-8️⃣ Training Function
+### 8. Training
+
+
 def train(epoch):
-    model.train()
+model.train()
+for data, target in loaders['train']:
+data, target = data.to(device), target.to(device)
+optimizer.zero_grad()
+output = model(data)
+loss = F.nll_loss(output, target)
+loss.backward()
+optimizer.step()
 
-    for batch_idx, (data, target) in enumerate(loaders['train']):
-        data, target = data.to(device), target.to(device)
 
-        optimizer.zero_grad()
-        output = model(data)
+Trains the model using backpropagation.
 
-        loss = F.nll_loss(output, target)
-        loss.backward()
-        optimizer.step()
+---
 
-Explanation:
+### 9. Testing
 
-Forward pass → predictions
 
-Compute loss
-
-Backpropagation (loss.backward())
-
-Update weights (optimizer.step())
-
-9️⃣ Testing Function
 def test():
-    model.eval()
-    test_loss = 0
-    correct = 0
+model.eval()
+correct = 0
+with torch.no_grad():
+for data, target in loaders['test']:
+data, target = data.to(device), target.to(device)
+output = model(data)
+pred = output.argmax(dim=1)
+correct += pred.eq(target).sum().item()
 
-    with torch.no_grad():
-        for data, target in loaders['test']:
-            data, target = data.to(device), target.to(device)
 
-            output = model(data)
-            test_loss += F.nll_loss(output, target, reduction='sum').item()
+Evaluates model performance.
 
-            pred = output.argmax(dim=1)
-            correct += pred.eq(target).sum().item()
+---
 
-Explanation:
+### 10. Training Loop
 
-model.eval() → evaluation mode
 
-no_grad() → disables gradient computation
-
-Calculates accuracy
-
-🔟 Training Loop
 for epoch in range(1, 11):
-    train(epoch)
-    test()
+train(epoch)
+test()
 
-Explanation:
 
-Runs training + testing for 10 epochs
+Runs training for 10 epochs.
 
-Improves model gradually
+---
 
-1️⃣1️⃣ Prediction & Visualization
-def predictor(data, model, device):
-    model.eval()
-    data = data.to(device)
-    output = model(data)
-    pred = output.argmax(dim=1, keepdim=True)
-    return pred.item()
-data, target = test_data[0]
-prediction = predictor(data.unsqueeze(0), model, device)
+## 📈 Results
 
-Explanation:
+- Accuracy: ~98% on MNIST  
+- Fast and efficient CNN model  
 
-Takes single image
+---
 
-Predicts digit
+## 🚀 Future Improvements
 
-Returns predicted label
+- Add Dropout  
+- Hyperparameter tuning  
+- Use deeper models  
+- Deploy as web app  
 
-📈 Results
+---
 
-Accuracy: ~98% on MNIST
-
-Fast and efficient CNN model
-
-🚀 Future Improvements
-
-Add Dropout (reduce overfitting)
-
-Hyperparameter tuning
-
-Use advanced models (ResNet)
-
-Deploy using Flask / Streamlit
-
-👨‍💻 Author
+## 👨‍💻 Author
 
 Lakshya Sahu
 
-📜 License
+---
+
+## 📜 License
 
 MIT License
+
+Now you can just:
+
+Copy everything
+
+Paste into README.md
+
+Push to GitHub ✅
